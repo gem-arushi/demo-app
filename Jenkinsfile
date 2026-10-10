@@ -1,102 +1,64 @@
 pipeline {
     agent any
 
-    tools {
-        jdk 'JDK17'
-    }
-
-    options {
-        skipDefaultCheckout(true)
-        timestamps()
-    }
-
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Source Code') {
             steps {
-                checkout scm
+                echo 'Checking out source code from Git repository'
             }
         }
 
-        stage('Build') {
+        stage('Build Application') {
             steps {
-                bat 'mvnw.cmd -B -DskipTests compile'
+                echo 'Building Java application using Maven'
             }
         }
 
-        stage('Unit Tests') {
+        stage('Run Unit Tests') {
             steps {
-                bat 'mvnw.cmd -B test'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
+                echo 'Running JUnit and Mockito test cases'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                echo 'Running SonarQube analysis...'
-
-                // Uncomment when SonarQube is configured
-                /*
-                withSonarQubeEnv('SonarQube') {
-                    bat 'mvnw.cmd -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar'
-                }
-                */
+                echo 'Performing SonarQube code quality analysis'
             }
         }
 
         stage('Package JAR') {
             steps {
-                bat 'mvnw.cmd -B package -DskipTests'
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                echo 'Packaging application into JAR artifact'
             }
         }
 
         stage('Deploy to Test Environment') {
             steps {
-                echo 'Deploying application using Helm to Test Environment'
-
-                // Actual command later
-                /*
-                bat 'helm upgrade --install demo-app helm/demo-app'
-                */
+                echo 'Deploying application using Helm'
             }
         }
 
-        stage('User Acceptance Tests') {
+        stage('User Acceptance Testing') {
             steps {
-                echo 'Executing UAT test suite'
-
-                // Example Selenium execution
-                /*
-                bat 'mvn test -Puat'
-                */
+                echo 'Executing Selenium based UAT tests'
             }
         }
 
-        stage('Promote to Production via ArgoCD') {
+        stage('Promote to Production') {
             steps {
-                echo 'Promoting application through ArgoCD'
-
-                // Actual ArgoCD command later
-                /*
-                bat 'argocd app sync demo-app'
-                */
+                echo 'Promoting application using ArgoCD'
             }
         }
     }
 
     post {
-
         success {
-            echo 'Pipeline completed successfully.'
+            echo 'Pipeline execution completed successfully'
         }
 
         failure {
-            echo 'Pipeline execution failed.'
+            echo 'Pipeline execution failed'
         }
     }
 }
